@@ -48,19 +48,6 @@ pipeline {
                                 " allParallelUnitTest --stacktrace"
                     }
                 }
-                stage('Integration Test') {
-                    steps {
-                        sh "./gradlew " +
-                                "-DbuildId=\"\${BUILD_ID}\" " +
-                                "-Dkubenetize=true " +
-                                "-Ddocker.run.tag=\"\${DOCKER_TAG_TO_USE}\" " +
-                                "-Dartifactory.username=\"\${ARTIFACTORY_CREDENTIALS_USR}\" " +
-                                "-Dartifactory.password=\"\${ARTIFACTORY_CREDENTIALS_PSW}\" " +
-                                "-Dgit.branch=\"\${GIT_BRANCH}\" " +
-                                "-Dgit.target.branch=\"\${GIT_BRANCH}\" " +
-                                " allParallelIntegrationTest --stacktrace"
-                    }
-                }
                 stage('Smoke Test') {
                     steps {
                         sh "./gradlew " +
@@ -72,19 +59,6 @@ pipeline {
                                 "-Dgit.branch=\"\${GIT_BRANCH}\" " +
                                 "-Dgit.target.branch=\"\${GIT_BRANCH}\" " +
                                 " allParallelSmokeTest --stacktrace"
-                    }
-                }
-                stage('Slow Integration Test') {
-                    steps {
-                        sh "./gradlew " +
-                                "-DbuildId=\"\${BUILD_ID}\" " +
-                                "-Dkubenetize=true " +
-                                "-Ddocker.run.tag=\"\${DOCKER_TAG_TO_USE}\" " +
-                                "-Dartifactory.username=\"\${ARTIFACTORY_CREDENTIALS_USR}\" " +
-                                "-Dartifactory.password=\"\${ARTIFACTORY_CREDENTIALS_PSW}\" " +
-                                "-Dgit.branch=\"\${GIT_BRANCH}\" " +
-                                "-Dgit.target.branch=\"\${GIT_BRANCH}\" " +
-                                " allParallelSlowIntegrationTest --stacktrace"
                     }
                 }
             }
