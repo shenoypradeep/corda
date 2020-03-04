@@ -3,9 +3,6 @@ import java.nio.file.Files
 import org.yaml.snakeyaml.DumperOptions
 
 buildscript {
-    repositories {
-        mavenCentral()
-    }
     dependencies {
         classpath "org.yaml:snakeyaml:1.24"
     }
