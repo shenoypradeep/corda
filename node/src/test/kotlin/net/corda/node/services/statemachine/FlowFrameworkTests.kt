@@ -577,7 +577,7 @@ class FlowFrameworkTests {
         var firstExecution = true
         var checkpointStatusInDBBeforeSuspension: Checkpoint.FlowStatus? = null
         var checkpointStatusInDBAfterSuspension: Checkpoint.FlowStatus? = null
-        var checkpointStatusInMemory: Checkpoint.FlowStatus? = null
+        var checkpointStatusInMemoryBeforeSuspension: Checkpoint.FlowStatus? = null
 
         SuspendingFlow.hookBeforeCheckpoint = {
             val flowFiber = this as? FlowStateMachineImpl<*>
@@ -592,7 +592,7 @@ class FlowFrameworkTests {
             } else {
                 // The persisted Checkpoint should be still failed here -> it should change to RUNNABLE after suspension
                 checkpointStatusInDBBeforeSuspension = aliceNode.internals.checkpointStorage.getAllCheckpoints().toList().single().second.status
-                checkpointStatusInMemory = flowFiber!!.transientState!!.value.checkpoint.status
+                checkpointStatusInMemoryBeforeSuspension = flowFiber.transientState!!.value.checkpoint.status
             }
         }
 
@@ -603,10 +603,11 @@ class FlowFrameworkTests {
         aliceNode.services.startFlow(SuspendingFlow()).resultFuture.getOrThrow()
 
         assertEquals(Checkpoint.FlowStatus.FAILED, checkpointStatusInDBBeforeSuspension)
-        assertEquals(Checkpoint.FlowStatus.RUNNABLE, checkpointStatusInMemory)
+        assertEquals(Checkpoint.FlowStatus.RUNNABLE, checkpointStatusInMemoryBeforeSuspension)
         assertEquals(Checkpoint.FlowStatus.RUNNABLE, checkpointStatusInDBAfterSuspension)
 
-        SuspendingFlow.hookBeforeCheckpoint = {} // clear SendFlow companion object
+        SuspendingFlow.hookBeforeCheckpoint = {}
+        SuspendingFlow.hookAfterCheckpoint = {}
     }
 
     @Test(timeout=300_000)
@@ -627,7 +628,7 @@ class FlowFrameworkTests {
                 throw SQLException("deadlock") // will cause flow to retry
             } else {
                 checkpointStatusInDB = aliceNode.internals.checkpointStorage.getAllCheckpoints().toList().single().second.status
-                checkpointStatusInMemory = flowFiber!!.transientState!!.value.checkpoint.status
+                checkpointStatusInMemory = flowFiber.transientState!!.value.checkpoint.status
             }
         }
 
@@ -636,7 +637,7 @@ class FlowFrameworkTests {
         assertEquals(Checkpoint.FlowStatus.FAILED, checkpointStatusInDB)
         assertEquals(Checkpoint.FlowStatus.RUNNABLE, checkpointStatusInMemory)
 
-        SuspendingFlow.hookAfterCheckpoint = {} // clear SendFlow companion object
+        SuspendingFlow.hookAfterCheckpoint = {}
     }
 
     // TODO: the following method should be removed when implementing CORDA-3604.
